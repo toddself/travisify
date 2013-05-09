@@ -43,7 +43,7 @@ withConfig(function (config) {
                 var pkg = JSON.parse(fs.readFileSync(dir + '/package.json'));
                 
                 var sv = (pkg.engines || {}).node || '>=0.4';
-                var vs = [ '0.6.15', '0.8.1' ].filter(function (v) {
+                var vs = [ '0.8.1', '0.10.0' ].filter(function (v) {
                     return semver.satisfies(v, sv);
                 });
                 if (vs.length === 0) {
@@ -56,7 +56,7 @@ withConfig(function (config) {
                         'language: node_js',
                         'node_js:',
                         vs.map(function (v) {
-                            return '  - ' + v.replace(/\.\d+$/, '');
+                            return '  - "' + v.replace(/\.\d+$/, '') + '"';
                         }).join('\n')
                     ].join('\n') + '\n');
                     
@@ -77,7 +77,12 @@ function hookUri (config, repo) {
 }
 
 function getHook (uri, cb) {
-    request.get({ uri : uri, json : true }, function (err, res, body) {
+    var opts = {
+        uri : uri,
+        json : true,
+        headers : { 'user-agent' : 'travisify' }
+    };
+    request.get(opts, function (err, res, body) {
         if (err) return cb(err);
         if (res.statusCode !== 200) return cb(body);
         if (!Array.isArray(body)) {
@@ -99,6 +104,7 @@ function testHook (config, repo) {
         var opts = {
             uri : uri + '/' + hook.id + '/test',
             body : '',
+            headers : { 'user-agent' : 'travisify' }
         };
         request.post(opts, function (err, res, body) {
             if (err) console.error(err)
@@ -129,7 +135,8 @@ function addHook (config, repo) {
         var opts = {
             uri : uri,
             body : JSON.stringify(doc),
-            json : true
+            json : true,
+            headers : { 'user-agent' : 'travisify' }
         };
         request.post(opts, function (err, res, body) {
             if (err) console.error(err);
