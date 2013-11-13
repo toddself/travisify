@@ -70,8 +70,15 @@ withConfig(function (config) {
 });
 
 function hookUri (config, repo) {
+    var user = config.user;
+    var pass = config.pass;
+    if(config.token){
+        user = config.token;
+        pass = 'x-oauth-basic';
+    }
+
     return 'https://'
-        + [ config.user, config.pass ].map(encodeURIComponent).join(':')
+        + [ user, pass ].map(encodeURIComponent).join(':')
         + '@api.github.com/repos/' + repo + '/hooks'
     ;
 }
